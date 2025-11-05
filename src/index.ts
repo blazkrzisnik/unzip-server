@@ -1,6 +1,8 @@
 import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { buffer } from 'micro';
+import AdmZip from 'adm-zip';
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -47,6 +49,21 @@ app.get('/api-data', (req, res) => {
 // Health check
 app.get('/healthz', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() })
+})
+app.post('/unzip', async (req, res) => {
+  try {
+    const buf = await buffer(req); // preberi binarni ZIP
+    const zip = new AdmZip(buf);
+    const files = zip.getEntries().map(entry => ({
+      name: entry.entryName,
+      data: entry.getData().toString('base64'), // vrne v base64
+    }));
+
+    return res.status(200).json({ files });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Failed to unzip' });
+  }
 })
 
 export default app
