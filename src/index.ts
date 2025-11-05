@@ -62,7 +62,7 @@ app.post('/unzip', async (req, res) => {
     return res.status(200).json({ files });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: 'Failed to unzip' });
+    return res.status(500).json({ error: 'Failed to unzip', err });
   }
 })
 
